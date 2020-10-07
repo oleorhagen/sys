@@ -108,6 +108,13 @@ var targets = []target{
 		Bits:      64,
 	},
 	{
+		GoArch:    "ppc",
+		LinuxArch: "powerpc",
+		GNUArch:   "powerpc-linux-gnu",
+		BigEndian: true,
+		Bits:      32,
+	},
+	{
 		GoArch:    "ppc64",
 		LinuxArch: "powerpc",
 		GNUArch:   "powerpc64-linux-gnu",
@@ -517,10 +524,20 @@ func (t *target) makeZErrorsFile() error {
 func (t *target) makeZTypesFile() error {
 	ztypesFile := fmt.Sprintf("ztypes_linux_%s.go", t.GoArch)
 
-	args := []string{"tool", "cgo", "-godefs", "--"}
+	// Run the cgo command directly, rather than using "go tool cgo",
+	// so that we can use GOARCH values that cmd/go does not support.
+	cmd := makeCommand("go", "tool", "-n", "cgo")
+	t.setTargetBuildArch(cmd)
+	cgob, err := cmd.Output()
+	if err != nil {
+		return err
+	}
+	cgo := strings.TrimSpace(string(cgob))
+
+	args := []string{"-godefs", "--"}
 	args = append(args, t.cFlags()...)
 	args = append(args, "linux/types.go")
-	return t.commandFormatOutput("mkpost", ztypesFile, "go", args...)
+	return t.commandFormatOutput("mkpost", ztypesFile, cgo, args...)
 }
 
 // Flags that should be given to gcc and cgo for this target
