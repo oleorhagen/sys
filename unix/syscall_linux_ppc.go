@@ -72,31 +72,31 @@ package unix
 //sys	utimes(path string, times *[2]Timeval) (err error)
 
 func setTimespec(sec, nsec int64) Timespec {
-	return Timespec{Sec: sec, Nsec: nsec}
+	return Timespec{Sec: int32(sec), Nsec: int32(nsec)}
 }
 
 func setTimeval(sec, usec int64) Timeval {
-	return Timeval{Sec: sec, Usec: usec}
+	return Timeval{Sec: int32(sec), Usec: int32(usec)}
 }
 
-func (r *PtraceRegs) PC() uint64 { return r.Nip }
+func (r *PtraceRegs) PC() uint64 { return uint64(r.Nip) }
 
-func (r *PtraceRegs) SetPC(pc uint64) { r.Nip = pc }
+func (r *PtraceRegs) SetPC(pc uint64) { r.Nip = uint32(pc) }
 
 func (iov *Iovec) SetLen(length int) {
-	iov.Len = uint64(length)
+	iov.Len = uint32(length)
 }
 
 func (msghdr *Msghdr) SetControllen(length int) {
-	msghdr.Controllen = uint64(length)
+	msghdr.Controllen = uint32(length)
 }
 
 func (msghdr *Msghdr) SetIovlen(length int) {
-	msghdr.Iovlen = uint64(length)
+	msghdr.Iovlen = uint32(length)
 }
 
 func (cmsg *Cmsghdr) SetLen(length int) {
-	cmsg.Len = uint64(length)
+	cmsg.Len = uint32(length)
 }
 
 //sysnb pipe(p *[2]_C_int) (err error)
